@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from .models import Employee, Skill, EmployeeSkill
+
+from .models import Employee, EmployeeSkill, Skill
 
 
 class EmployeeSkillInline(admin.TabularInline):
@@ -13,7 +14,6 @@ class EmployeeInline(admin.StackedInline):
     model = Employee
     can_delete = False
     verbose_name_plural = "Дополнительная информация"
-    filter_horizontal = ["skills"]
 
 
 class CustomUserAdmin(UserAdmin):
@@ -22,12 +22,15 @@ class CustomUserAdmin(UserAdmin):
 
 class EmployeeAdmin(admin.ModelAdmin):
     list_display = ["full_name", "gender", "get_skills"]
-    list_filter = ["gender", "skills"]
+    list_filter = ["gender"]
     search_fields = ["user__first_name", "user__last_name", "user__email"]
     inlines = [EmployeeSkillInline]
-    
+
     def get_skills(self, obj):
-        return ", ".join([skill.name for skill in obj.skills.all()])
+        return ", ".join(
+            [f"{es.skill.name} ({es.level})" for es in obj.employeeskill_set.all()]
+        )
+
     get_skills.short_description = "Навыки"
 
 
@@ -42,7 +45,6 @@ class EmployeeSkillAdmin(admin.ModelAdmin):
     search_fields = ["employee__user__first_name", "employee__user__last_name"]
 
 
-# Перерегистрируем UserAdmin
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 
