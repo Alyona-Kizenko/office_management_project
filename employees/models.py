@@ -1,28 +1,91 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-from workplaces.models import Workplace
+
+class Skill(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Название навыка")
+    
+    class Meta:
+        verbose_name = "Навык"
+        verbose_name_plural = "Навыки"
+    
+    def __str__(self):
+        return self.name
+
+
+class EmployeeSkill(models.Model):
+    employee = models.ForeignKey(
+        "Employee", 
+        on_delete=models.CASCADE, 
+        verbose_name="Сотрудник"
+    )
+    skill = models.ForeignKey(
+        Skill, 
+        on_delete=models.CASCADE, 
+        verbose_name="Навык"
+    )
+    level = models.IntegerField(
+        choices=[(i, str(i)) for i in range(1, 11)],
+        verbose_name="Уровень навыка"
+    )
+    
+    class Meta:
+        verbose_name = "Навык сотрудника"
+        verbose_name_plural = "Навыки сотрудников"
+        unique_together = ["employee", "skill"]
+    
+    def __str__(self):
+        return f"{self.employee} - {self.skill} (уровень {self.level})"
 
 
 class Employee(models.Model):
-    first_name = models.CharField(max_length=50, verbose_name="Имя")
-    last_name = models.CharField(max_length=50, verbose_name="Фамилия")
-    position = models.CharField(max_length=100, verbose_name="Должность")
-    email = models.EmailField(verbose_name="Email")
-    phone = models.CharField(max_length=20, verbose_name="Телефон")
-    workplace = models.ForeignKey(
-        Workplace,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        verbose_name="Рабочее место",
+    GENDER_CHOICES = [
+        ("M", "Мужской"),
+        ("F", "Женский"),
+        ("O", "Другой"),
+    ]
+    
+    user = models.OneToOneField(
+        User, 
+        on_delete=models.CASCADE, 
+        verbose_name="Пользователь"
     )
-    hire_date = models.DateField(verbose_name="Дата приема на работу")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создано")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
-
+    middle_name = models.CharField(
+        max_length=50, 
+        blank=True, 
+        verbose_name="Отчество"
+    )
+    gender = models.CharField(
+        max_length=1, 
+        choices=GENDER_CHOICES, 
+        verbose_name="Пол"
+    )
+    skills = models.ManyToManyField(
+        Skill, 
+        through=EmployeeSkill, 
+        verbose_name="Навыки"
+    )
+    description = models.TextField(verbose_name="Описание", blank=True)
+    
     class Meta:
         verbose_name = "Сотрудник"
         verbose_name_plural = "Сотрудники"
-
+    
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.user.last_name} {self.user.first_name} {self.middle_name or ''}".strip()
+    
+    def full_name(self):
+        return f"{self.user.last_name} {self.user.first_name} {self.middle_name or ''}".strip()
+
+
+@receiver(post_save, sender=User)
+def create_employee(sender, instance, created, **kwargs):
+    if created:
+        Employee.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_employee(sender, instance, **kwargs):
+    instance.employee.save()
