@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if not user.is_authenticated %}
+<div class="auth-warning">
+    <p>Для просмотра подробной информации необходимо <a href="{% url 'admin:login' %}">войти в систему</a>.</p>
+</div>
+{% else %}
+<div class="employee-detail">
+    <h1>{{ employee.full_name }}</h1>
+    
+    <div class="employee-info">
+        <p><strong>Пол:</strong> {{ employee.get_gender_display }}</p>
+        <p><strong>Навыки:</strong></p>
+        <ul>
+            {% for es in employee.employeeskill_set.all %}
+            <li>{{ es.skill.name }} - Уровень {{ es.level }}</li>
+            {% empty %}
+            <li>Нет навыков</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    {% if employee.images.all %}
+    <div class="employee-gallery">
+        <h2>Галерея</h2>
+        <div class="gallery">
+            {% for image in employee.images.all %}
+            <img src="{{ image.image.url }}" alt="Фото сотрудника {{ forloop.counter }}">
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

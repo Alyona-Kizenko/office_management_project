@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero">
+    <h1>Система управления сотрудниками</h1>
+    <p>Добро пожаловать в систему управления сотрудниками и рабочими местами</p>
+</div>
+
+<div class="featured-employees">
+    <h2>Наши сотрудники</h2>
+    <div class="employee-cards">
+        {% for employee in employees %}
+        <div class="employee-card" onclick="location.href='{% url 'employees:employee_detail' employee.pk %}'">
+            <h3>{{ employee.full_name }}</h3>
+            <p>Навыки: {{ employee.get_skills_display }}</p>
+        </div>
+        {% empty %}
+        <p>Пока нет сотрудников</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
