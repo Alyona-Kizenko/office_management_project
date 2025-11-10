@@ -35,13 +35,15 @@ ROOT_URLCONF = "office_management.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.media", 
+                "django.template.context_processors.static",
             ],
         },
     },
@@ -84,6 +86,12 @@ USE_TZ = True
 
 
 STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]  
+STATIC_ROOT = BASE_DIR / "staticfiles"     
+
+# Настройки для media файлов (изображений)
+MEDIA_URL = "/media/"                      
+MEDIA_ROOT = BASE_DIR / "media"            
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
