@@ -5,11 +5,7 @@ app_name = "employees"
 
 urlpatterns = [
     path("", views.home, name="home"),
-    path("employees/", views.employee_list, name="employee_list"),
-    path(
-        "employees/<int:pk>/",
-        views.employee_detail,
-        name="employee_detail",
-    ),
+    path("list/", views.employee_list, name="employee_list"),
+    path("<int:pk>/", views.employee_detail, name="employee_detail"),
     path("about/", views.project_description, name="project_description"),
 ]

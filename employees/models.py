@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
+from django.utils import timezone
 
 
 class Skill(models.Model):
@@ -19,8 +20,7 @@ class Skill(models.Model):
 class Employee(models.Model):
     GENDER_CHOICES = [
         ("M", "Мужской"),
-        ("F", "Женский"),
-        ("O", "Другой"),
+        ("F", "Женский")
     ]
 
     user = models.OneToOneField(
@@ -30,6 +30,8 @@ class Employee(models.Model):
         null=True,
         blank=True,
     )
+    first_name = models.CharField(max_length=50, verbose_name="Имя", blank=True)
+    last_name = models.CharField(max_length=50, verbose_name="Фамилия", blank=True)
     middle_name = models.CharField(max_length=50, blank=True, verbose_name="Отчество")
     gender = models.CharField(
         max_length=1, choices=GENDER_CHOICES, blank=True, null=True, verbose_name="Пол"
@@ -38,17 +40,22 @@ class Employee(models.Model):
         Skill, through="EmployeeSkill", verbose_name="Навыки", blank=True
     )
     description = models.TextField(verbose_name="Описание", blank=True)
+    hire_date = models.DateField(
+        verbose_name="Дата приёма на работу", 
+        default=timezone.now,
+        blank=True,
+        null=True
+    )
 
     class Meta:
         verbose_name = "Сотрудник"
         verbose_name_plural = "Сотрудники"
 
     def __str__(self):
-        return f"{self.user.last_name} {self.user.first_name} {self.middle_name or ''}".strip()
+        return f"{self.last_name} {self.first_name} {self.middle_name or ''}".strip()
 
     def full_name(self):
-        """Возвращает полное имя сотрудника"""
-        return f"{self.user.last_name} {self.user.first_name} {self.middle_name or ''}".strip()
+        return f"{self.last_name} {self.first_name} {self.middle_name or ''}".strip()
 
     def get_skills_display(self):
         """Возвращает строку с навыками и уровнями"""

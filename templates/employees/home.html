@@ -1,22 +1,33 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="hero">
-    <h1>Система управления сотрудниками</h1>
-    <p>Добро пожаловать в систему управления сотрудниками и рабочими местами</p>
+<h1>Главная страница</h1>
+
+<div class="total-employees">
+    <h3>Всего сотрудников в компании: {{ total_employees }}</h3>
 </div>
 
-<div class="featured-employees">
-    <h2>Наши сотрудники</h2>
-    <div class="employee-cards">
-        {% for employee in employees %}
-        <div class="employee-card" onclick="location.href='{% url 'employees:employee_detail' employee.pk %}'">
-            <h3>{{ employee.full_name }}</h3>
-            <p>Навыки: {{ employee.get_skills_display }}</p>
-        </div>
-        {% empty %}
-        <p>Пока нет сотрудников</p>
-        {% endfor %}
+<p>Добро пожаловать в систему управления сотрудниками!</p>
+
+<h2>Новые сотрудники</h2>
+<div class="employee-cards">
+    {% for employee in employees %}
+    <div class="employee-card">
+    
+        {% if employee.staff_image %}
+        <img src="{{ employee.staff_image.image.url }}" alt="{{ employee.full_name }}" width="200">
+        {% endif %}
+        
+        <h3><a href="{% url 'employees:employee_detail' employee.pk %}">{{ employee.full_name }}</a></h3>
+        
+        <p><strong>Навыки:</strong> {{ employee.get_skills_display }}</p>
+        
+        <p><strong>Стаж:</strong> {{ employee.work_experience }} дней</p>
     </div>
+    {% empty %}
+    <p>Пока нет сотрудников</p>
+    {% endfor %}
 </div>
 {% endblock %}

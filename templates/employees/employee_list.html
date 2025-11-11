@@ -1,16 +1,41 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
 <h1>Все сотрудники</h1>
 
-<div class="employee-cards">
-    {% for employee in employees %}
-    <div class="employee-card" onclick="location.href='{% url 'employees:employee_detail' employee.pk %}'">
-        <h3>{{ employee.full_name }}</h3>
-        <p>Навыки: {{ employee.get_skills_display }}</p>
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; первая</a>
+            <a href="?page={{ page_obj.previous_page_number }}">предыдущая</a>
+        {% endif %}
+
+        <span class="current">
+            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">следующая</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">последняя &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
+<div class="employee-list">
+    {% for employee in page_obj %}
+    <div class="employee-item">
+        {% if employee.staff_image %}
+        <img src="{{ employee.staff_image.image.url }}" alt="{{ employee.full_name }}" width="150">
+        {% endif %}
+        
+        <h3><a href="{% url 'employees:employee_detail' employee.pk %}">{{ employee.full_name }}</a></h3>
+        
+        <p><strong>Навыки:</strong> {{ employee.get_skills_display }}</p>
+        
+        <p><strong>Стаж:</strong> {{ employee.work_experience }} дней</p>
     </div>
-    {% empty %}
-    <p>Пока нет сотрудников</p>
     {% endfor %}
 </div>
 {% endblock %}
